@@ -1,11 +1,11 @@
+
 function transformData(sourceSchemas) {
-  // Early return if source schema doesn't exist
-  if (!sourceSchemas || !sourceSchemas["FiservPersonE2eTest"]) {
+  const fiserv = sourceSchemas["FiservPersonE2eTest"];
+  if (!fiserv) {
     return {};
   }
 
-  const source = sourceSchemas["FiservPersonE2eTest"];
-  const target = {
+  const result = {
     id: "",
     firstName: "",
     lastName: "",
@@ -14,262 +14,228 @@ function transformData(sourceSchemas) {
     addresses: []
   };
 
-  // Copy Customer's full legal name from FiservPersonE2eTest.name to ORCA_Person.fullName
-  if (source?.name !== undefined) {
-    target.fullName = source.name;
+  // Copy customer's full legal name from FiservPersonE2eTest.name to ORCA_Person.fullName
+  if (fiserv?.name) {
+    result.fullName = fiserv.name;
   }
 
   // Copy Customer's family name from FiservPersonE2eTest.structuredName.lastName to ORCA_Person.lastName
-  if (source?.structuredName?.lastName !== undefined) {
-    target.lastName = source.structuredName.lastName;
-  }
-
-  // Copy Customer's given name from FiservPersonE2eTest.structuredName.firstName to ORCA_Person.firstName
-  if (source?.structuredName?.firstName !== undefined) {
-    target.firstName = source.structuredName.firstName;
-  }
-
-  // Copy Customer's middle name from FiservPersonE2eTest.structuredName.middleName to ORCA_Person.middleName
-  if (source?.structuredName?.middleName !== undefined) {
-    target.middleName = source.structuredName.middleName;
-  }
-
-  // Copy Name suffix or generation from FiservPersonE2eTest.structuredName.suffix to ORCA_Person.suffix
-  if (source?.structuredName?.suffix !== undefined) {
-    target.suffix = source.structuredName.suffix;
+  if (fiserv?.structuredName?.lastName) {
+    result.lastName = fiserv.structuredName.lastName;
   }
 
   // Copy customer gender designation from FiservPersonE2eTest.gender to ORCA_Person.gender
-  if (source?.gender !== undefined) {
-    // Map the gender values from number to string
-    if (source.gender === "1") {
-      target.gender = "Male";
-    } else if (source.gender === "2") {
-      target.gender = "Female";
-    }
+  if (fiserv?.gender) {
+    result.gender = fiserv.gender === "1" ? "Male" : (fiserv.gender === "2" ? "Female" : fiserv.gender);
   }
 
-  // Copy Customer date of birth from FiservPersonE2eTest.placeAndDateOfBirth.birthDate to ORCA_Person.birthDate
-  if (source?.placeAndDateOfBirth?.birthDate !== undefined) {
-    target.birthDate = source.placeAndDateOfBirth.birthDate;
+  // Copy Customer's given name from FiservPersonE2eTest.structuredName.firstName to ORCA_Person.firstName
+  if (fiserv?.structuredName?.firstName) {
+    result.firstName = fiserv.structuredName.firstName;
   }
 
-  // Copy Customer date of birth from FiservPersonE2eTest.placeAndDateOfBirth.birthDate to ORCA_Person.placeAndDateOfBirth.birthDate
-  if (source?.placeAndDateOfBirth?.birthDate !== undefined) {
-    if (!target.placeAndDateOfBirth) {
-      target.placeAndDateOfBirth = {};
-    }
-    target.placeAndDateOfBirth.birthDate = source.placeAndDateOfBirth.birthDate;
+  // Copy Customer's middle name from FiservPersonE2eTest.structuredName.middleName to ORCA_Person.middleName
+  if (fiserv?.structuredName?.middleName) {
+    result.middleName = fiserv.structuredName.middleName;
   }
 
-  // Copy Birth information from FiservPersonE2eTest.placeAndDateOfBirth to ORCA_Person.placeAndDateOfBirth
-  if (source?.placeAndDateOfBirth) {
-    if (!target.placeAndDateOfBirth) {
-      target.placeAndDateOfBirth = {};
-    }
-    // We already handled birthDate above, so we don't need to copy it again
+  // Copy Name suffix or generation from FiservPersonE2eTest.structuredName.suffix to ORCA_Person.suffix
+  if (fiserv?.structuredName?.suffix) {
+    result.suffix = fiserv.structuredName.suffix;
   }
 
   // Copy Tax identification number from FiservPersonE2eTest.taxInformation.tin to ORCA_Person.taxId
-  if (source?.taxInformation?.tin !== undefined) {
-    target.taxId = source.taxInformation.tin;
+  if (fiserv?.taxInformation?.tin) {
+    result.taxId = fiserv.taxInformation.tin;
   }
 
   // Copy Customer tax status from FiservPersonE2eTest.taxInformation.taxStatus to ORCA_Person.taxStatus
-  if (source?.taxInformation?.taxStatus !== undefined) {
-    target.taxStatus = source.taxInformation.taxStatus;
-  }
-
-  // Copy Customer classification code from FiservPersonE2eTest.customerType to ORCA_Person.customerType
-  if (source?.customerType !== undefined) {
-    // Map numeric customer type to string enum
-    switch (source.customerType) {
-      case 1:
-        target.customerType = "Personal";
-        break;
-      case 2:
-        target.customerType = "Business";
-        break;
-      default:
-        // Leave undefined if not matching
-        break;
-    }
-  }
-
-  // Copy job title of the person from FiservPersonE2eTest.contact.phones.comment to TargetSchema.jobTitle
-  if (source?.contact?.phones && source.contact.phones.length > 0 && source.contact.phones[0]?.comment !== undefined) {
-    target.jobTitle = source.contact.phones[0].comment;
+  if (fiserv?.taxInformation?.taxStatus) {
+    result.taxStatus = fiserv.taxInformation.taxStatus;
   }
 
   // Copy customer account status from FiservPersonE2eTest.audit.status to ORCA_Person.status
-  if (source?.audit?.status !== undefined) {
-    target.status = source.audit.status;
+  if (fiserv?.audit?.status) {
+    result.status = fiserv.audit.status;
+  }
+
+  // Copy Customer date of birth from FiservPersonE2eTest.placeAndDateOfBirth.birthDate to ORCA_Person.birthDate
+  if (fiserv?.placeAndDateOfBirth?.birthDate) {
+    result.birthDate = fiserv.placeAndDateOfBirth.birthDate;
+  }
+
+  // Copy Customer date of birth from FiservPersonE2eTest.placeAndDateOfBirth.birthDate to ORCA_Person.placeAndDateOfBirth.birthDate
+  if (fiserv?.placeAndDateOfBirth?.birthDate) {
+    if (!result.placeAndDateOfBirth) {
+      result.placeAndDateOfBirth = {};
+    }
+    result.placeAndDateOfBirth.birthDate = fiserv.placeAndDateOfBirth.birthDate;
+  }
+
+  // Copy Birth information from FiservPersonE2eTest.placeAndDateOfBirth to ORCA_Person.placeAndDateOfBirth
+  if (fiserv?.placeAndDateOfBirth) {
+    if (!result.placeAndDateOfBirth) {
+      result.placeAndDateOfBirth = {};
+    }
+    // Only copy fields that exist in the source
+    Object.keys(fiserv.placeAndDateOfBirth).forEach(key => {
+      if (fiserv.placeAndDateOfBirth[key] !== undefined) {
+        result.placeAndDateOfBirth[key] = fiserv.placeAndDateOfBirth[key];
+      }
+    });
+  }
+
+  // Copy Customer classification code from FiservPersonE2eTest.customerType to ORCA_Person.customerType
+  if (fiserv?.customerType !== undefined) {
+    // Map numeric customerType to string values
+    const typeMap = {
+      1: "Personal",
+      2: "Business"
+    };
+    result.customerType = typeMap[fiserv.customerType] || String(fiserv.customerType);
   }
 
   // Copy Customer's preferred language from FiservPersonE2eTest.contact.preferredLanguage to ORCA_Person.preferredLanguage
-  if (source?.contact?.preferredLanguage !== undefined) {
-    target.preferredLanguage = source.contact.preferredLanguage;
+  if (fiserv?.contact?.preferredLanguage) {
+    result.preferredLanguage = fiserv.contact.preferredLanguage;
   }
 
-  // Copy record creation timestamp from FiservPersonE2eTest.audit.creationDate to ORCA_Person.audit.creationDate
-  if (source?.audit?.creationDate !== undefined) {
-    if (!target.audit) {
-      target.audit = {};
-    }
-    target.audit.creationDate = source.audit.creationDate;
-  }
-
-  // Copy last updated timestamp from FiservPersonE2eTest.audit.lastModificationDate to ORCA_Person.audit.lastModificationDate
-  if (source?.audit?.lastModificationDate !== undefined) {
-    if (!target.audit) {
-      target.audit = {};
-    }
-    target.audit.lastModificationDate = source.audit.lastModificationDate;
-  }
-
-  // Copy last modification method from FiservPersonE2eTest.audit.lastModificationChannel to ORCA_Person.audit.lastModificacionChannel
-  if (source?.audit?.lastModificationChannel !== undefined) {
-    if (!target.audit) {
-      target.audit = {};
-    }
-    target.audit.lastModificacionChannel = source.audit.lastModificationChannel;
+  // Copy job title of the person from FiservPersonE2eTest.contact.phones.comment to TargetSchema.jobTitle
+  if (fiserv?.contact?.phones?.[0]?.comment) {
+    result.jobTitle = fiserv.contact.phones[0].comment;
   }
 
   // Copy Email address from FiservPersonE2eTest.contact.emails[].emailAddress to ORCA_Person.emailAddresses[].address
-  if (source?.contact?.emails && Array.isArray(source.contact.emails)) {
-    source.contact.emails.forEach(email => {
-      if (email?.emailAddress !== undefined) {
-        const targetEmail = {
-          address: email.emailAddress
-        };
-        if (email?.emailPurpose) {
-          // Map purpose to type if available
-          switch (email.emailPurpose.toLowerCase()) {
-            case "personal":
-              targetEmail.type = "Personal";
-              break;
-            case "business":
-              targetEmail.type = "Work";
-              break;
-            default:
-              targetEmail.type = "Other";
-              break;
-          }
-        }
-        target.emailAddresses.push(targetEmail);
-      }
-    });
+  if (fiserv?.contact?.emails && Array.isArray(fiserv.contact.emails)) {
+    result.emailAddresses = fiserv.contact.emails
+      .filter(email => email?.emailAddress)
+      .map(email => ({
+        address: email.emailAddress,
+        type: email.emailPurpose === "Personal" ? "Personal" : 
+              (email.emailPurpose === "Business" ? "Work" : "Other")
+      }));
   }
 
   // Copy Phone number from FiservPersonE2eTest.contact.phones[].number to ORCA_Person.phoneNumbers[].number
-  // Copy Type of phone from FiservPersonE2eTest.contact.phones[].phoneType to ORCA_Person.phoneNumbers[].type
-  if (source?.contact?.phones && Array.isArray(source.contact.phones)) {
-    source.contact.phones.forEach(phone => {
-      if (phone?.number !== undefined) {
-        const targetPhone = {
-          number: phone.number
-        };
-        if (phone?.phoneType !== undefined) {
-          // Map phone types
-          switch (phone.phoneType.toLowerCase()) {
-            case "home":
-              targetPhone.type = "Home";
-              break;
-            case "mobile":
-              targetPhone.type = "Mobile";
-              break;
-            case "work":
-              targetPhone.type = "Work";
-              break;
-            default:
-              targetPhone.type = "Other";
-              break;
-          }
-        }
-        target.phoneNumbers.push(targetPhone);
-      }
-    });
-  }
-
-  // Copy Street address lines from FiservPersonE2eTest.contact.postalAddresses[].addressLines[] to ORCA_Person.addresses[].line1
-  // Copy Country code from FiservPersonE2eTest.contact.postalAddresses[].country to ORCA_Person.addresses[].country
-  // Copy Postal or ZIP code from FiservPersonE2eTest.contact.postalAddresses[].postCode to ORCA_Person.addresses[].postalCode
-  if (source?.contact?.postalAddresses && Array.isArray(source.contact.postalAddresses)) {
-    source.contact.postalAddresses.forEach((address, index) => {
-      const targetAddress = {
-        addressId: `A${1000 + index}`, // Generate an address ID
-        line1: "",
-        city: "", // Required field but no source mapping
-        state: "", // Required field but no source mapping
-        postalCode: ""
-      };
-
-      if (address?.addressLines && Array.isArray(address.addressLines) && address.addressLines.length > 0) {
-        targetAddress.line1 = address.addressLines[0];
-        if (address.addressLines.length > 1) {
-          targetAddress.line2 = address.addressLines[1];
-        }
-      }
-
-      if (address?.country !== undefined) {
-        targetAddress.country = address.country;
-      }
-
-      if (address?.postCode !== undefined) {
-        targetAddress.postalCode = address.postCode;
-      }
-
-      target.addresses.push(targetAddress);
-    });
+  if (fiserv?.contact?.phones && Array.isArray(fiserv.contact.phones)) {
+    result.phoneNumbers = fiserv.contact.phones
+      .filter(phone => phone?.number)
+      .map(phone => ({
+        number: phone.number,
+        type: phone.phoneType || "Other"
+      }));
   }
 
   // Copy Customer identification documents from FiservPersonE2eTest.identifiers to ORCA_Person.identifiers
-  // Copy ID document number from FiservPersonE2eTest.identifiers[].number to ORCA_Person.identifiers[].number
-  // Copy Type of identification from FiservPersonE2eTest.identifiers[].schemeName to ORCA_Person.identifiers[].schemeName
-  // Copy Issuing authority from FiservPersonE2eTest.identifiers[].issuer to ORCA_Person.identifiers[].issuer
-  // Copy Date ID was issued from FiservPersonE2eTest.identifiers[].issueDate to ORCA_Person.identifiers[].issueDate
-  // Copy Date ID expires from FiservPersonE2eTest.identifiers[].expirationDate to ORCA_Person.identifiers[].expirationDate
-  if (source?.identifiers && Array.isArray(source.identifiers)) {
-    target.identifiers = source.identifiers.map(identifier => {
-      const targetIdentifier = {
-        number: identifier.number || "",
-        schemeName: identifier.schemeName || ""
+  if (fiserv?.identifiers && Array.isArray(fiserv.identifiers)) {
+    result.identifiers = fiserv.identifiers.map(id => {
+      const newId = {};
+      
+      // Copy ID document number
+      if (id?.number) {
+        newId.number = id.number;
+      }
+      
+      // Copy Type of identification
+      if (id?.schemeName) {
+        newId.schemeName = id.schemeName;
+      }
+      
+      // Copy Issuing authority
+      if (id?.issuer) {
+        newId.issuer = id.issuer;
+      }
+      
+      // Copy Date ID was issued
+      if (id?.issueDate) {
+        newId.issueDate = id.issueDate;
+      }
+      
+      // Copy Date ID expires
+      if (id?.expirationDate) {
+        newId.expirationDate = id.expirationDate;
+      }
+      
+      return newId;
+    });
+  }
+
+  // Copy Street address lines and postal address data
+  if (fiserv?.contact?.postalAddresses && Array.isArray(fiserv.contact.postalAddresses)) {
+    result.addresses = fiserv.contact.postalAddresses.map((addr, index) => {
+      const newAddr = {
+        addressId: `A${1000 + index}`,
+        line1: "",
+        city: "",
+        state: "",
+        postalCode: ""
       };
-
-      if (identifier.issuer !== undefined) {
-        targetIdentifier.issuer = identifier.issuer;
+      
+      // Copy Street address lines
+      if (addr?.addressLines && Array.isArray(addr.addressLines) && addr.addressLines.length > 0) {
+        newAddr.line1 = addr.addressLines[0] || "";
+        if (addr.addressLines.length > 1) {
+          newAddr.line2 = addr.addressLines[1] || "";
+        }
       }
-
-      if (identifier.issueDate !== undefined) {
-        targetIdentifier.issueDate = identifier.issueDate;
+      
+      // Copy Postal or ZIP code
+      if (addr?.postCode) {
+        newAddr.postalCode = addr.postCode;
       }
-
-      if (identifier.expirationDate !== undefined) {
-        targetIdentifier.expirationDate = identifier.expirationDate;
+      
+      // Copy Country code
+      if (addr?.country) {
+        newAddr.country = addr.country;
       }
-
-      return targetIdentifier;
+      
+      return newAddr;
     });
   }
 
-  // Copy Customer communication preferences from FiservPersonE2eTest.communicationChannels to ORCA_Person.communicationChannels
-  // Copy Communication channel name from FiservPersonE2eTest.communicationChannels[].name to ORCA_Person.communicationChannels[].channel
-  // Copy Indicates primary contact method from FiservPersonE2eTest.communicationChannels[].primaryContactIndicator to ORCA_Person.communicationChannels[].primaryIndicator
-  if (source?.communicationChannels && Array.isArray(source.communicationChannels)) {
-    target.communicationChannels = source.communicationChannels.map(channel => {
-      const targetChannel = {};
-
-      if (channel.name !== undefined) {
-        targetChannel.channel = channel.name;
+  // Copy Customer communication preferences
+  if (fiserv?.communicationChannels && Array.isArray(fiserv.communicationChannels)) {
+    result.communicationChannels = fiserv.communicationChannels.map(channel => {
+      const newChannel = {};
+      
+      // Copy Communication channel name
+      if (channel?.name) {
+        newChannel.channel = channel.name;
       }
-
-      if (channel.primaryContactIndicator !== undefined) {
-        targetChannel.primaryIndicator = channel.primaryContactIndicator;
+      
+      // Copy Indicates primary contact method
+      if (channel?.primaryContactIndicator !== undefined) {
+        newChannel.primaryIndicator = channel.primaryContactIndicator;
       }
-
-      return targetChannel;
+      
+      return newChannel;
     });
   }
 
-  return target;
+  // Copy audit information
+  if (fiserv?.audit) {
+    result.audit = {};
+    
+    // Copy record creation timestamp
+    if (fiserv.audit.creationDate) {
+      result.audit.creationDate = fiserv.audit.creationDate;
+    }
+    
+    // Copy last updated timestamp
+    if (fiserv.audit.lastModificationDate) {
+      result.audit.lastModificationDate = fiserv.audit.lastModificationDate;
+    }
+    
+    // Copy last modification method
+    if (fiserv.audit.lastModificationChannel) {
+      result.audit.lastModificacionChannel = fiserv.audit.lastModificationChannel;
+    }
+    
+    // Copy customer account status
+    if (fiserv.audit.status) {
+      result.audit.status = fiserv.audit.status;
+    }
+  }
+
+  return result;
 }
